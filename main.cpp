@@ -1,161 +1,284 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <string>
 
-#include "automaton.h"
 
 using namespace std;
+//class for finite automaton 
+template<typename State, typename Alphabet>
+class FiniteAutomaton {
+public:
+
+    //setters for fields 
+  
+    void setStates(const vector<State>& states) {
+        this->states = states;
+    }
+
+    void setAlphabet(const vector<Alphabet>& alphabet) {
+        this->alphabet = alphabet;
+    }
+
+    void setInitial(const State& initial) {
+        this->initial = initial;
+    }
+
+    void setFinal(const State & final) {
+        this->final = final;
+    }
+
+    void setTransitions(const map<pair<State, Alphabet>, State>& transitions) {
+        this->transitions = transitions;
+    }
+
+    //bool method for fsmN1( .1 and .2)
+    bool checkString(const vector<Alphabet>& input) const {
+        State currentState = initial;
+
+        for (const auto& symbol : input) {
+            auto transition = transitions.find({ currentState, symbol });
+
+            if (transition != transitions.end()) {
+                currentState = transition->second;
+            }
+            else {
+                return false;
+            }
+        }
+
+        return currentState == final;
+    }
+
+    // bool method for fsmN2
+    bool checkSubstring(const string& input, const string& substring) const {
+        vector<Alphabet> inputSymbols(input.begin(), input.end());
+
+        // Check if the substring is found
+        for (size_t i = 0; i <= inputSymbols.size() - substring.length(); ++i) {
+            if (checkString(vector<Alphabet>(inputSymbols.begin() + i, inputSymbols.begin() + i + substring.length()))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+private:
+
+    // class fields 
+    vector<State> states;
+    vector<Alphabet> alphabet;
+    State initial;
+    State final;
+    map<pair<State, Alphabet>, State> transitions;
+};
+
+
+
+
+
 
 
 int main() {
-    
-    //introduction
-    cout << "this automaton accepts a string if the first symbol in char alphabet meets even number of times\n\n ";
 
-    // Entering the size of the alphabet
-    cout << "Enter the size of the alphabet:  ";
+
+    cout << "FiniteStateMachine N1.1 " << endl;
+    // FiniteStateMachine N1.1 (char) realisation
+
+
+    // Introduction
+    cout << "(This automaton accepts a string if the first symbol in the alphabet meets an even number of times.)\n\n";
+
+    // Creating FiniteAutomaton object
+    FiniteAutomaton<int, char> automatonIntChar;
+
+
+    // User input for FiniteAutomaton<int, char>
     int alphabetSize;
-   cin >> alphabetSize;
+    cout << "Enter the size of the alphabet: ";
+    cin >> alphabetSize;
 
-    // The size of the alphabet must be non-negative
     if (alphabetSize <= 0) {
         cout << "Invalid alphabet size. Exiting...\n";
         return 1;
     }
 
-    // User Alphabet Input
-    vector<char> alphabet;
+    //user alphabet input 
+    vector<char> alphabetChar;
     cout << "Enter the alphabet characters (separate with spaces, max " << alphabetSize << "): ";
     for (int i = 0; i < alphabetSize; ++i) {
         char symbol;
         cin >> symbol;
-        alphabet.push_back(symbol);
+        alphabetChar.push_back(symbol);
     }
 
-    //  User Input of String Length
-    cout << "Enter the length of the string: ";
+    automatonIntChar.setStates({ 0, 1 });
+    automatonIntChar.setAlphabet(alphabetChar);
+    automatonIntChar.setInitial(0);
+    automatonIntChar.setFinal(0);
+
+    map<pair<int, char>, int> transitionsIntChar;
+    transitionsIntChar[{0, alphabetChar[0]}] = 1;
+    transitionsIntChar[{1, alphabetChar[0]}] = 0;
+
+    for (int i = 1; i < alphabetSize; ++i) {
+        transitionsIntChar[{0, alphabetChar[i]}] = 0;
+        transitionsIntChar[{1, alphabetChar[i]}] = 1;
+    }
+
+    automatonIntChar.setTransitions(transitionsIntChar);
+
+
+    // String Validation
     int stringLength;
+    cout << "Enter the length of the string: ";
     cin >> stringLength;
 
-    // Entering a string to check for the even inclusion of the first character of the alphabet 
-    vector<char> input;
+    // Validate FiniteAutomaton<int, char>
+    vector<char> inputChar;
     cout << "Enter the string to check (length " << stringLength << "): ";
-    char symbol;
+    char symbolChar;
     for (int i = 0; i < stringLength; ++i) {
-        cin >> symbol;
-        input.push_back(symbol);
+        cin >> symbolChar;
+        inputChar.push_back(symbolChar);
     }
 
-
-
-    // Creating Transitions for a State Machine
-    map<std::pair<int, char>, int> transitions;
-
-
-      //state machine Logic
-    transitions[{0, alphabet[0]}] = 1;//  From even to odd (originally even)
-    transitions[{1, alphabet[0]}] = 0;//  From odd to even
-
-    //  Transitions for all possible dimensions of the alphabet
-    for (int i = 1; i < alphabetSize; ++i)
-    {
-      transitions[{0, alphabet[i]}] = 0;
-     transitions[{1, alphabet[i]}] = 1;
-    }
-
-    //Creating a State Machine 
-    FiniteAutomaton<int, char> automaton
-    (
-        { 0, 1 },                // States (0-even1-odd number of the first character of the alphabet in a string)
-        alphabet,              // Alphabet (previously entered by the user)
-        0,                     // Initial state (initially even(=0))
-        0,                     //  Output state (accept a string if the number of inclusions of the first character is even)
-        transitions               // Transitions created based on the length of the alphabet 
-    );
-
-    // String Validation 
-    if (automaton.checkString(input)) {
-        cout << "String is accepted (amount of " << alphabet[0] << " is even).\n";// successis the even number of the first character of the alphabet in the entered string 
+    if (automatonIntChar.checkString(inputChar)) {
+        cout << "String is accepted (amount of " << alphabetChar[0] << " is even).\n";
     }
     else {
-        cout << "String is not accepted (amount of " << alphabet[0] << " is odd).\n";// Failure- An odd number of the first character of the alphabet in the entered string 
+        cout << "String is not accepted (amount of " << alphabetChar[0] << " is odd).\n\n";
     }
-   
-
-    // int 
 
 
-    //introduction
-    cout << "this automaton accepts a string if the first symbol in Int alphabet meets even number of times\n\n ";
 
-    // Entering the size of the alphabet
-    cout << "Enter the size of the alphabet:  ";
-    int alphabetSizeI;
-    cin >> alphabetSizeI;
 
-    // The size of the alphabet must be non-negative
-    if (alphabetSizeI <= 0) {
+
+    // FiniteStateMachine N1.2 (int type)
+    cout << "\n\nFiniteStateMachine N1.2 (This automaton accepts a int string if the first symbol in the alphabet meets an even number of times.)" << endl;
+    // User input for FiniteAutomaton<int, int>
+    FiniteAutomaton<int, int> automatonIntInt;
+
+    //alphabet input 
+    int alphabetSizeInt;
+    cout << "Enter the size of the alphabet: ";
+    cin >> alphabetSizeInt;
+
+    if (alphabetSizeInt <= 0) {
         cout << "Invalid alphabet size. Exiting...\n";
         return 1;
     }
 
-    // User Alphabet Input
-    vector<int> alphabetI;
-    cout << "Enter the alphabet characters (separate with spaces, max " << alphabetSizeI << "): ";
-    for (int i = 0; i < alphabetSizeI; ++i) {
-        char symbolI;
-        cin >> symbolI;
-        alphabetI.push_back(symbolI);
+    vector<int> alphabetInt;
+    cout << "Enter the alphabet characters (separate with spaces, max " << alphabetSizeInt << "): ";
+    for (int i = 0; i < alphabetSizeInt; ++i) {
+        int symbol;
+        cin >> symbol;
+        alphabetInt.push_back(symbol);
     }
 
-    //  User Input of String Length
+    //setting up the automaton 
+    automatonIntInt.setStates({ 0, 1 });
+    automatonIntInt.setAlphabet(alphabetInt);
+    automatonIntInt.setInitial(0);
+    automatonIntInt.setFinal(0);
+    
+
+    //transitiod 
+    map<pair<int, int>, int> transitionsIntInt;
+    transitionsIntInt[{0, alphabetInt[0]}] = 1;
+    transitionsIntInt[{1, alphabetInt[0]}] = 0;
+
+    for (int i = 1; i < alphabetSizeInt; ++i) {
+        transitionsIntInt[{0, alphabetInt[i]}] = 0;
+        transitionsIntInt[{1, alphabetInt[i]}] = 1;
+    }
+
+    automatonIntInt.setTransitions(transitionsIntInt);
+
+    // String Validation
+    int IntstringLength;
     cout << "Enter the length of the string: ";
-    int stringLengthI;
-    cin >> stringLengthI;
+    cin >> IntstringLength;
 
-    // Entering a string to check for the even inclusion of the first character of the alphabet 
-    vector<int> inputI;
-    cout << "Enter the string to check (length" << stringLengthI << "): ";
-    char symbolI;
-    for (int i = 0; i < stringLengthI; ++i) {
-        cin >> symbolI;
-        inputI.push_back(symbolI);
+    // Validate FiniteAutomaton<int, int>
+    vector<int> inputInt;
+    cout << "Enter the string to check (length " << IntstringLength << "): (after each symbol push space)";
+    int symbolInt;
+    for (int i = 0; i < IntstringLength; ++i) {
+        cin >> symbolInt;
+        inputInt.push_back(symbolInt);
     }
 
-
-
-    // Creating Transitions for a State Machine
-    map<std::pair<int, int>, int> transitionsI;
-
-
-    //state machine Logic
-    transitionsI[{0, alphabetI[0]}] = 1;//  From even to odd (originally even)
-    transitionsI[{1, alphabetI[0]}] = 0;//  From odd to even
-
-    //  Transitions for all possible dimensions of the alphabet
-    for (int i = 1; i < alphabetSizeI; ++i)
-    {
-        transitionsI[{0, alphabetI[i]}] = 0;
-        transitionsI[{1, alphabetI[i]}] = 1;
-    }
-
-    //Creating a State Machine 
-    FiniteAutomaton<int, int> automatonInt
-    (
-        { 0, 1 },                // States (0-even1-odd number of the first character of the alphabet in a string)
-        alphabetI,              // Alphabet (previously entered by the user)
-        0,                     // Initial state (initially even(=0))
-        0,                     //  Output state (accept a string if the number of inclusions of the first character is even)
-        transitionsI               // Transitions created based on the length of the alphabet 
-    );
-
-    // String Validation 
-    if (automatonInt.checkString(inputI)) {
-        cout << "String is accepted (amount of " << alphabetI[0] << " is even).\n";// successis the even number of the first character of the alphabet in the entered string 
+    if (automatonIntInt.checkString(inputInt)) {
+        cout << "String is accepted (amount of " << alphabetInt[0] << " is even).\n";
     }
     else {
-        cout << "String is not accepted (amount of " << alphabetI[0] << " is odd).\n";// Failure- An odd number of the first character of the alphabet in the entered string 
+        cout << "String is not accepted (amount of " << alphabetInt[0] << " is odd).\n";
     }
+
+
+
+
+    cout << "\n\nFiniteStateMachine N2 (This automaton find the substring in a string.)" << endl;
+    // FiniteStateMachine N2 
+
+
+         // Input alphabet
+    string alphabetString;
+    cout << "Enter the alphabet: ";
+    cin >> alphabetString;
+
+    // Convert the alphabet string to a vector of characters
+    vector<char> alphabet(alphabetString.begin(), alphabetString.end());
+
+    // Input the substring
+    string substring;
+    cout << "Enter the substring(without spaces): ";
+    cin >> substring;
+
+    // Input the main string
+    string inputString;
+    cout << "Enter the main string(without spaces): ";
+    cin >> inputString;
+
+    // Create an instance of FiniteAutomaton
+    FiniteAutomaton<int, char> automaton;
+
+    // Set up the automaton transitions based on user input
+    automaton.setStates({});
+    automaton.setAlphabet(alphabet);
+    automaton.setInitial(0);
+    automaton.setFinal(substring.length());
+
+    // Inside the main function after setting up the transitions
+    map<pair<int, char>, int> transitions;
+
+    for (size_t state = 0; state <= substring.length(); ++state) {
+        for (char symbol : alphabet) {
+            size_t nextState = min(state + 1, substring.length());
+            while (nextState > 0 && substring[nextState - 1] != symbol) {
+                nextState = automaton.checkString(
+                    vector<char>(substring.begin(), substring.begin() + nextState - 1) ) ? 1 : 0;
+            }
+            transitions[{state, symbol}] = nextState;
+        }
+    }
+
+    automaton.setTransitions(transitions);
+
+
+    // Check if the substring is found
+    if (automaton.checkSubstring(inputString, substring)) {
+        cout << "Substring " << substring << " was found in a string!" << endl;
+    }
+    else {
+        cout << "Substring " << substring << " was not found in a string." << endl;
+    }
+
+
 
     return 0;
 }
