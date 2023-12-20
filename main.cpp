@@ -186,7 +186,7 @@ int main() {
     automatonIntInt.setFinal(0);
     
 
-    //transitiod 
+    //transition
     map<pair<int, int>, int> transitionsIntInt;
     transitionsIntInt[{0, alphabetInt[0]}] = 1;
     transitionsIntInt[{1, alphabetInt[0]}] = 0;
